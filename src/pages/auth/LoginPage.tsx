@@ -25,8 +25,21 @@ const LoginPage = () => {
     try {
       await login(data.email, data.password);
       navigate('/dashboard');
-    } catch (err) {
-      setError('Invalid email or password. Please try again.');
+    } catch (err: any) {
+      console.error('Login error:', err);
+      
+      // Handle specific error cases
+      if (err.message?.includes('Invalid email or password')) {
+        setError('Invalid email or password. Please check your credentials.');
+      } else if (err.message?.includes('User profile not found')) {
+        setError('User profile not found. Please contact support.');
+      } else if (err.message?.includes('Failed to fetch user profile')) {
+        setError('Unable to retrieve your profile. Please try again later.');
+      } else if (err.message?.includes('network')) {
+        setError('Network error. Please check your internet connection and try again.');
+      } else {
+        setError('An unexpected error occurred. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -61,6 +74,7 @@ const LoginPage = () => {
                   }
                 })}
                 className={`w-full px-3 py-2 border ${errors.email ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                disabled={isLoading}
               />
               {errors.email && (
                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
@@ -76,6 +90,7 @@ const LoginPage = () => {
                 id="password"
                 {...register('password', { required: 'Password is required' })}
                 className={`w-full px-3 py-2 border ${errors.password ? 'border-red-500' : 'border-gray-300'} rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500`}
+                disabled={isLoading}
               />
               {errors.password && (
                 <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
@@ -106,8 +121,8 @@ const LoginPage = () => {
       <div className="mt-6 text-center">
         <p className="text-sm text-gray-600">
           For demo purposes:<br />
-          User: <span className="font-medium">user@example.com</span> / Password: <span className="font-medium">password123</span><br />
-          Admin: <span className="font-medium">admin@example.com</span> / Password: <span className="font-medium">admin123</span>
+          Superadmin: <span className="font-medium">superadmin@sheltercrest.org</span> / Password: <span className="font-medium">SuperAdmin@2025</span><br />
+          Test User: <span className="font-medium">testuser@sheltercrest.org</span> / Password: <span className="font-medium">TestUser@2025</span>
         </p>
       </div>
     </div>

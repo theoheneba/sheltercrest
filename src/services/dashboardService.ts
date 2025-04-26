@@ -64,7 +64,7 @@ export const dashboardService = {
   },
 
   // User Management
-  async updateUserRole(userId: string, role: 'user' | 'admin') {
+  async updateUserRole(userId: string, role: 'user' | 'admin' | 'superadmin') {
     const { data, error } = await supabase
       .from('profiles')
       .update({ role })
@@ -86,34 +86,6 @@ export const dashboardService = {
 
     if (error) throw error;
     return data;
-  },
-
-  // System Configuration
-  async updateSystemSettings(settings: any) {
-    const { data, error } = await supabase
-      .from('system_settings')
-      .upsert({
-        id: settings.id || undefined,
-        settings,
-        updated_at: new Date().toISOString()
-      })
-      .select()
-      .single();
-
-    if (error) throw error;
-    return data;
-  },
-
-  async getSystemSettings() {
-    const { data, error } = await supabase
-      .from('system_settings')
-      .select('*')
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .single();
-
-    if (error && error.code !== 'PGRST116') throw error;
-    return data?.settings || null;
   },
 
   // Support Management
@@ -150,16 +122,6 @@ export const dashboardService = {
     return data;
   },
 
-  // Analytics
-  async getAnalytics(dateRange: string) {
-    const { data, error } = await supabase.rpc('get_dashboard_analytics', {
-      date_range: dateRange
-    });
-
-    if (error) throw error;
-    return data;
-  },
-
   // Payment Management
   async updatePayment(id: string, data: any) {
     const { data: result, error } = await supabase
@@ -171,15 +133,6 @@ export const dashboardService = {
 
     if (error) throw error;
     return result;
-  },
-
-  async getPaymentAnalytics(dateRange: string) {
-    const { data, error } = await supabase.rpc('get_payment_analytics', {
-      date_range: dateRange
-    });
-
-    if (error) throw error;
-    return data;
   },
 
   // Document Upload
@@ -234,5 +187,43 @@ export const dashboardService = {
 
     if (error) throw error;
     return result;
+  },
+
+  // Product Management
+  async getProducts(filters?: any) {
+    let query = supabase.from('products').select(`
+      *,
+      category:category_id(*)
+    `);
+
+    if (filters?.category) {
+      query = query.eq('category_id', filters.category);
+    }
+
+    if (filters?.status) {
+      query = query.eq('status', filters.status);
+    }
+
+    if (filters?.minPrice) {
+      query = query.gte('price', filters.minPrice);
+    }
+
+    if (filters?.maxPrice) {
+      query = query.lte('price', filters.maxPrice);
+    }
+
+    const { data, error } = await query.order('name');
+    if (error) throw error;
+    return data;
+  },
+
+  async getProductCategories() {
+    const { data, error } = await supabase
+      .from('product_categories')
+      .select('*')
+      .order('name');
+
+    if (error) throw error;
+    return data;
   }
 };

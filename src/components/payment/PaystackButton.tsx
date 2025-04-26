@@ -11,12 +11,18 @@ interface PaystackButtonProps {
 
 const PaystackButton = ({ amount, onSuccess, onClose, className }: PaystackButtonProps) => {
   const { user } = useAuth();
+  const publicKey = import.meta.env.VITE_PAYSTACK_PUBLIC_KEY;
+
+  if (!publicKey) {
+    console.error('Paystack public key not found');
+    return null;
+  }
 
   const config = {
     reference: `pay_${Math.floor(Math.random() * 1000000000 + 1)}`,
     email: user?.email || '',
-    amount: amount * 100, // Convert to pesewas
-    publicKey: import.meta.env.VITE_PAYSTACK_PUBLIC_KEY || '',
+    amount: Math.round(amount * 100), // Convert to pesewas and ensure it's a whole number
+    publicKey,
     currency: 'GHS',
   };
 

@@ -1,9 +1,9 @@
-import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
-import { SmtpClient } from 'https://deno.land/x/smtp/mod.ts';
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { SmtpClient } from "https://deno.land/x/smtp@v0.7.0/mod.ts";
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
 serve(async (req) => {
@@ -15,16 +15,16 @@ serve(async (req) => {
     const client = new SmtpClient();
 
     await client.connectTLS({
-      hostname: 'smtp.hostinger.com',
+      hostname: "smtp.hostinger.com",
       port: 465,
-      username: 'info@sheltercrest.org',
-      password: '@3sheltercrest.orG',
+      username: "info@sheltercrest.org",
+      password: "@3sheltercrest.orG",
     });
 
     const { to, subject, html, attachments } = await req.json();
 
     const result = await client.send({
-      from: 'info@sheltercrest.org',
+      from: "info@sheltercrest.org",
       to,
       subject,
       content: html,

@@ -12,6 +12,13 @@ export interface Payment {
   created_at: string;
 }
 
+export interface PaymentVerification {
+  reference: string;
+  amount: number;
+  userId: string;
+  applicationId: string;
+}
+
 export const paymentService = {
   async createPayment(data: Omit<Payment, 'id' | 'created_at'>) {
     try {
@@ -45,22 +52,47 @@ export const paymentService = {
     }
   },
 
-  async verifyPayment(reference: string) {
+  async verifyPayment(data: PaymentVerification) {
     try {
-      const response = await fetch(`/api/verify-payment`, {
+      // First, verify the payment with Paystack
+      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-payment`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
         },
-        body: JSON.stringify({ reference }),
+        body: JSON.stringify({ reference: data.reference }),
       });
 
       if (!response.ok) {
         throw new Error('Payment verification failed');
       }
 
-      const data = await response.json();
-      return data;
+      const verificationResult = await response.json();
+      
+      if (!verificationResult.success) {
+        throw new Error(verificationResult.message || 'Payment verification failed');
+      }
+
+      // If verification is successful, update the payment record
+      const { data: payment, error } = await supabase
+        .from('payments')
+        .insert([{
+          application_id: data.applicationId,
+          amount: data.amount,
+          due_date: new Date().toISOString().split('T')[0], // Today's date
+          paid_date: new Date().toISOString(),
+          status: 'completed',
+          payment_method: 'paystack',
+          transaction_id: data.reference
+        }])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      toast.success('Payment successful!');
+      return payment;
     } catch (error: any) {
       toast.error(error.message || 'Payment verification failed');
       throw error;
