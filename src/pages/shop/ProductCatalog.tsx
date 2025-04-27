@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Search, Filter, ShoppingCart, Plus, Star } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
-import { supabase } from '../../services/supabaseClient';
+import { supabase } from '../../services/db';
 import { useCartStore } from '../../store/cartStore';
 
 interface Product {
@@ -41,9 +41,9 @@ const ProductCatalog = () => {
         .from('product_categories')
         .select('*')
         .order('name');
-      
+
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 
@@ -64,19 +64,19 @@ const ProductCatalog = () => {
 
       switch (sortBy) {
         case 'price_asc':
-          query = query.order('price');
+          query = query.order('price', { ascending: true });
           break;
         case 'price_desc':
           query = query.order('price', { ascending: false });
           break;
         case 'name':
-          query = query.order('name');
+          query = query.order('name', { ascending: true });
           break;
       }
 
       const { data, error } = await query;
       if (error) throw error;
-      return data;
+      return data || [];
     }
   });
 

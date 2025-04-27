@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { UserPlus } from 'lucide-react';
 import Button from '../../components/ui/Button';
-import Card, { CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/Card';
+import Card, { CardContent } from '../../components/ui/Card';
 import { useAuth } from '../../contexts/AuthContext';
 import PasswordStrengthChecker from '../../components/auth/PasswordStrengthChecker';
 
@@ -20,6 +20,7 @@ interface RegisterForm {
   employmentStatus: string;
   employerName: string;
   monthlyIncome: string;
+  role: 'user' | 'admin';
 }
 
 const RegisterPage = () => {
@@ -61,22 +62,22 @@ const RegisterPage = () => {
         state: data.state,
         employmentStatus: data.employmentStatus,
         employerName: data.employerName,
-        monthlyIncome: parseFloat(data.monthlyIncome)
+        monthlyIncome: parseFloat(data.monthlyIncome),
+        role: data.role
       });
       navigate('/dashboard');
-    } catch (err) {
-      setError('Registration failed. Please try again later.');
+    } catch (err: any) {
+      setError(err.message);
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-12 animate-fade-in">
+    <div className="max-w-2xl mx-auto py-8 animate-fade-in">
+      <h1 className="text-3xl font-bold text-center mb-8">Create Account</h1>
+      
       <Card>
-        <CardHeader>
-          <CardTitle className="text-center text-2xl">Create Account</CardTitle>
-        </CardHeader>
         <CardContent>
           {error && (
             <div className="bg-red-50 text-red-700 p-3 rounded-md mb-4">
@@ -119,6 +120,21 @@ const RegisterPage = () => {
                   )}
                 </div>
               </div>
+            </div>
+
+            {/* Account Type */}
+            <div>
+              <label htmlFor="role" className="block text-sm font-medium text-gray-700 mb-1">
+                Account Type
+              </label>
+              <select
+                id="role"
+                {...register('role')}
+                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+              >
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
 
             {/* Contact Information */}
@@ -326,15 +342,16 @@ const RegisterPage = () => {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="text-center">
-          <p className="text-sm text-gray-600">
-            Already have an account?{' '}
-            <Link to="/login" className="text-primary-700 hover:text-primary-800 font-medium">
-              Sign in
-            </Link>
-          </p>
-        </CardFooter>
       </Card>
+
+      <div className="text-center mt-6">
+        <p className="text-sm text-gray-600">
+          Already have an account?{' '}
+          <Link to="/login" className="text-primary-700 hover:text-primary-800 font-medium">
+            Sign in
+          </Link>
+        </p>
+      </div>
     </div>
   );
 };

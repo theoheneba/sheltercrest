@@ -1,10 +1,26 @@
 export const calculateInitialPayment = (monthlyRent: number) => {
-  const twoMonthsDeposit = monthlyRent * 2;
-  const companyInterest = twoMonthsDeposit * 0.28;
+  // Service fee equals one month's rent
+  const serviceFee = monthlyRent;
+  
+  // Property visit fee is fixed at 120 GHS
+  const visitFee = 120;
+  
+  // Document processing fee is fixed at 60 GHS
+  const processingFee = 60;
+  
+  // Interest is 28% of one month's rent (not two months)
+  const interest = monthlyRent * 0.28;
+  
+  // Two months deposit
+  const deposit = monthlyRent * 2;
+  
   return {
-    deposit: twoMonthsDeposit,
-    interest: companyInterest,
-    total: twoMonthsDeposit + companyInterest
+    deposit,
+    interest,
+    serviceFee,
+    visitFee,
+    processingFee,
+    total: deposit + interest + serviceFee + visitFee + processingFee
   };
 };
 

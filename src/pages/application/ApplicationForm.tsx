@@ -1,18 +1,25 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import { calculateInitialPayment, formatCurrency } from '../../utils/paymentCalculations';
+import { useConditionalEligibility } from '../../hooks/useConditionalEligibility';
+import { useUserStore } from '../../store/userStore';
+import { toast } from 'react-hot-toast';
 
 const ApplicationForm = () => {
   const navigate = useNavigate();
+  const { isEligible, isLoading, redirectToEligibilityCheck } = useConditionalEligibility();
+  const { createApplication, loading } = useUserStore();
+  
   const [formData, setFormData] = useState({
-    loanAmount: '',
-    rentAmount: '',
-    purpose: '',
-    duration: '',
-    income: '',
-    employment: '',
+    monthlyRent: '',
+    depositAmount: '',
+    interestAmount: '',
+    serviceFee: '',
+    visitFee: '',
+    processingFee: '',
+    totalInitialPayment: '',
     landlordName: '',
     landlordEmail: '',
     landlordPhone: '',
@@ -21,81 +28,118 @@ const ApplicationForm = () => {
     leaseEndDate: ''
   });
 
+  useEffect(() => {
+    if (!isLoading && !isEligible) {
+      redirectToEligibilityCheck();
+    }
+  }, [isEligible, isLoading, redirectToEligibilityCheck]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  if (!isEligible) {
+    return null; // Component will redirect in useEffect
+  }
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      [name]: value
-    }));
+    setFormData(prev => {
+      const newData = { ...prev, [name]: value };
+      
+      // Calculate all fees when monthly rent changes
+      if (name === 'monthlyRent' && value) {
+        const monthlyRent = parseFloat(value);
+        const { deposit, interest, serviceFee, visitFee, processingFee, total } = calculateInitialPayment(monthlyRent);
+        return {
+          ...newData,
+          depositAmount: deposit.toString(),
+          interestAmount: interest.toString(),
+          serviceFee: serviceFee.toString(),
+          visitFee: visitFee.toString(),
+          processingFee: processingFee.toString(),
+          totalInitialPayment: total.toString()
+        };
+      }
+      
+      return newData;
+    });
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Handle form submission
+    
+    try {
+      // Validate required fields
+      const requiredFields = [
+        'monthlyRent',
+        'landlordName',
+        'landlordEmail',
+        'landlordPhone',
+        'propertyAddress',
+        'leaseStartDate',
+        'leaseEndDate'
+      ];
+
+      const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+      
+      if (missingFields.length > 0) {
+        toast.error('Please fill in all required fields');
+        return;
+      }
+
+      // Submit application
+      await createApplication({
+        monthly_rent: parseFloat(formData.monthlyRent),
+        deposit_amount: parseFloat(formData.depositAmount),
+        interest_amount: parseFloat(formData.interestAmount),
+        service_fee: parseFloat(formData.serviceFee),
+        visit_fee: parseFloat(formData.visitFee),
+        processing_fee: parseFloat(formData.processingFee),
+        total_initial_payment: parseFloat(formData.totalInitialPayment),
+        landlord_name: formData.landlordName,
+        landlord_email: formData.landlordEmail,
+        landlord_phone: formData.landlordPhone,
+        property_address: formData.propertyAddress,
+        lease_start_date: formData.leaseStartDate,
+        lease_end_date: formData.leaseEndDate,
+        status: 'pending'
+      });
+
+      // Navigate to dashboard on success
+      navigate('/dashboard');
+    } catch (error) {
+      console.error('Application submission error:', error);
+      toast.error('Failed to submit application. Please try again.');
+    }
   };
 
-  const initialPayment = formData.rentAmount ? 
-    calculateInitialPayment(Number(formData.rentAmount)) : 
-    { deposit: 0, interest: 0, total: 0 };
+  const monthlyRent = formData.monthlyRent ? parseFloat(formData.monthlyRent) : 0;
+  const initialPayment = calculateInitialPayment(monthlyRent);
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Rent Assistance Application</h1>
+    <div className="max-w-4xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold text-gray-900">Rent Assistance Application</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <Card>
             <form onSubmit={handleSubmit} className="space-y-6 p-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                  <label htmlFor="rentAmount" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label htmlFor="monthlyRent" className="block text-sm font-medium text-gray-700 mb-1">
                     Monthly Rent Amount (GH₵)
                   </label>
                   <input
                     type="number"
-                    id="rentAmount"
-                    name="rentAmount"
-                    value={formData.rentAmount}
+                    id="monthlyRent"
+                    name="monthlyRent"
+                    value={formData.monthlyRent}
                     onChange={handleInputChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
                     required
                   />
                 </div>
-
-                <div>
-                  <label htmlFor="income" className="block text-sm font-medium text-gray-700 mb-1">
-                    Monthly Income (GH₵)
-                  </label>
-                  <input
-                    type="number"
-                    id="income"
-                    name="income"
-                    value={formData.income}
-                    onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div>
-                <label htmlFor="employment" className="block text-sm font-medium text-gray-700 mb-1">
-                  Employment Status
-                </label>
-                <select
-                  id="employment"
-                  name="employment"
-                  value={formData.employment}
-                  onChange={handleInputChange}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
-                  required
-                >
-                  <option value="">Select status</option>
-                  <option value="full-time">Full-time</option>
-                  <option value="part-time">Part-time</option>
-                  <option value="self-employed">Self-employed</option>
-                  <option value="contract">Contract</option>
-                </select>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -192,13 +236,17 @@ const ApplicationForm = () => {
                 </div>
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button 
+                type="submit" 
+                className="w-full"
+                isLoading={loading}
+              >
                 Submit Application
               </Button>
             </form>
           </Card>
         </div>
-
+        
         <div>
           <Card>
             <div className="p-6">
@@ -213,7 +261,19 @@ const ApplicationForm = () => {
                       <span>{formatCurrency(initialPayment.deposit)}</span>
                     </p>
                     <p className="flex justify-between">
-                      <span>Company Interest (28%):</span>
+                      <span>Service Fee:</span>
+                      <span>{formatCurrency(initialPayment.serviceFee)}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Property Visit Fee:</span>
+                      <span>{formatCurrency(initialPayment.visitFee)}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Document Processing Fee:</span>
+                      <span>{formatCurrency(initialPayment.processingFee)}</span>
+                    </p>
+                    <p className="flex justify-between">
+                      <span>Interest (28% on 1 month):</span>
                       <span>{formatCurrency(initialPayment.interest)}</span>
                     </p>
                     <div className="pt-2 mt-2 border-t border-gray-200">

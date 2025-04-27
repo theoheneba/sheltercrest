@@ -27,19 +27,7 @@ const LoginPage = () => {
       navigate('/dashboard');
     } catch (err: any) {
       console.error('Login error:', err);
-      
-      // Handle specific error cases
-      if (err.message?.includes('Invalid email or password')) {
-        setError('Invalid email or password. Please check your credentials.');
-      } else if (err.message?.includes('User profile not found')) {
-        setError('User profile not found. Please contact support.');
-      } else if (err.message?.includes('Failed to fetch user profile')) {
-        setError('Unable to retrieve your profile. Please try again later.');
-      } else if (err.message?.includes('network')) {
-        setError('Network error. Please check your internet connection and try again.');
-      } else {
-        setError('An unexpected error occurred. Please try again later.');
-      }
+      setError(err.message || 'An unexpected error occurred');
     } finally {
       setIsLoading(false);
     }
@@ -58,8 +46,8 @@ const LoginPage = () => {
             </div>
           )}
           
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <div className="mb-4">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Email
               </label>
@@ -81,7 +69,7 @@ const LoginPage = () => {
               )}
             </div>
             
-            <div className="mb-6">
+            <div>
               <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Password
               </label>

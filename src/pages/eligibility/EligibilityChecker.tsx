@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Check, AlertCircle, ArrowRight, ArrowLeft } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card from '../../components/ui/Card';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface FormData {
   employmentStatus: string;
@@ -25,6 +26,7 @@ const EligibilityChecker = () => {
   const [isLoading, setIsLoading] = useState(false);
   
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
   
   const totalSteps = 3;
   
@@ -49,26 +51,39 @@ const EligibilityChecker = () => {
   const checkEligibility = () => {
     setIsLoading(true);
     
-    // Simulate API call with 1 second delay
-    setTimeout(() => {
-      // Basic eligibility logic:
-      // 1. Must be full time employee
-      // 2. Employed for at least 6 months
-      // 3. Rent > 30% of salary
-      // 4. Credit score >= 600
-      const isFTEmployee = formData.employmentStatus === 'full-time';
-      const hasMinEmploymentTime = ['6m-1y', '1y-3y', '3y+'].includes(formData.employmentDuration);
-      const rentPercentage = (formData.rentAmount * 12) / formData.salary * 100;
-      const hasSufficientCredit = formData.creditScore >= 600;
-      
-      // Changed the logic to check if rent is GREATER than 30% of income
-      const meetsRentCriteria = rentPercentage > 30;
-      
-      const eligible = isFTEmployee && hasMinEmploymentTime && meetsRentCriteria && hasSufficientCredit;
-      
-      setIsEligible(eligible);
-      setIsLoading(false);
-    }, 1000);
+    // Basic eligibility logic:
+    // 1. Must be full time employee
+    // 2. Employed for at least 6 months
+    // 3. Rent > 30% of salary
+    // 4. Credit score >= 600
+    const isFTEmployee = formData.employmentStatus === 'full-time';
+    const hasMinEmploymentTime = ['6m-1y', '1y-3y', '3y+'].includes(formData.employmentDuration);
+    const rentPercentage = (formData.rentAmount * 12) / formData.salary * 100;
+    const hasSufficientCredit = formData.creditScore >= 600;
+    
+    // Changed the logic to check if rent is GREATER than 30% of income
+    const meetsRentCriteria = rentPercentage > 30;
+    
+    const eligible = isFTEmployee && hasMinEmploymentTime && meetsRentCriteria && hasSufficientCredit;
+    
+    // Store eligibility result in localStorage
+    localStorage.setItem('eligibilityData', JSON.stringify({
+      eligible,
+      timestamp: Date.now(),
+      formData
+    }));
+
+    setIsEligible(eligible);
+    setIsLoading(false);
+
+    // After eligibility check, redirect based on authentication status
+    if (eligible) {
+      if (!isAuthenticated) {
+        navigate('/register');
+      } else {
+        navigate('/application');
+      }
+    }
   };
   
   const renderStepContent = () => {

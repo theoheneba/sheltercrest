@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
@@ -18,6 +18,8 @@ import { usePayments } from '../../hooks/usePayments';
 import { calculateInitialPayment, calculateLatePaymentFee, formatCurrency } from '../../utils/paymentCalculations';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import PaymentModal from '../../components/payment/PaymentModal';
+import { paymentService } from '../../services/paymentService';
+import { useUserStore } from '../../store/userStore';
 
 const fadeIn = {
   initial: { opacity: 0, y: 20 },
@@ -48,8 +50,15 @@ const UserDashboard = () => {
   const { upcomingPayment, recentPayments } = usePayments();
   const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'documents'>('overview');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
+  const { applications, fetchApplications, setupSubscriptions, cleanup } = useUserStore();
 
-  const monthlyRent = applicationData?.rentAmount || 1200;
+  useEffect(() => {
+    fetchApplications();
+    setupSubscriptions();
+    return () => cleanup();
+  }, [fetchApplications, setupSubscriptions, cleanup]);
+
+  const monthlyRent = applicationData?.monthlyRent || 1200;
   const initialPayment = calculateInitialPayment(monthlyRent);
   
   const today = new Date();

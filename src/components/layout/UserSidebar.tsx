@@ -7,18 +7,26 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useApplicationStatus } from '../../hooks/useApplicationStatus';
+import { useConditionalEligibility } from '../../hooks/useConditionalEligibility';
+import Button from '../ui/Button';
 
 const UserSidebar = () => {
   const location = useLocation();
   const { user } = useAuth();
   const { status } = useApplicationStatus();
+  const { isEligible, redirectToEligibilityCheck } = useConditionalEligibility();
   
   const menuItems = [
     {
       group: 'Main',
       items: [
         { path: '/dashboard', label: 'Dashboard', icon: <LayoutDashboard size={20} /> },
-        { path: '/application', label: 'My Application', icon: <FileText size={20} /> },
+        {
+          path: isEligible ? '/application' : '/eligibility',
+          label: 'My Application',
+          icon: <FileText size={20} />,
+          onClick: !isEligible ? redirectToEligibilityCheck : undefined
+        },
         { path: '/payments', label: 'Payment History', icon: <CreditCard size={20} /> },
         { path: '/documents', label: 'Documents', icon: <Files size={20} /> },
         { path: '/shop', label: 'Shop', icon: <ShoppingBag size={20} /> }
@@ -88,6 +96,7 @@ const UserSidebar = () => {
                 <Link
                   key={item.path}
                   to={item.path}
+                  onClick={item.onClick}
                   className={`flex items-center px-3 py-2 text-sm font-medium rounded-lg transition-colors ${
                     location.pathname === item.path
                       ? 'bg-primary-50 text-primary-900'
