@@ -8,14 +8,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing Supabase environment variables');
 }
 
-export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey);
+
+// Configure the client with proper auth settings
+supabase.auth.setSession({
   auth: {
     autoRefreshToken: true,
     persistSession: true,
-    storage: localStorage
-  },
-  db: {
-    schema: 'public'
+    storage: window.localStorage
   },
   realtime: {
     enabled: true,

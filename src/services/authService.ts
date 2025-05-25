@@ -34,6 +34,9 @@ export const authService = {
 
       if (signInError) throw signInError;
       if (!user) throw new Error('No user returned from login');
+      
+      // Store the session in localStorage to ensure persistence
+      localStorage.setItem('supabase.auth.token', JSON.stringify(session));
 
       // Get user profile
       const { data: profile, error: profileError } = await supabase
@@ -116,6 +119,10 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       const { error } = await supabase.auth.signOut();
+      
+      // Clear any stored session data
+      localStorage.removeItem('supabase.auth.token');
+      
       if (error) throw error;
       toast.success('Logged out successfully');
     } catch (error: any) {

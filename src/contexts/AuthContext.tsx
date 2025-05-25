@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../services/authService';
-import { createClient } from '@supabase/supabase-js';
 import { toast } from 'react-hot-toast';
+import { supabase } from '../services/db';
 
 interface User {
   id: string;
@@ -71,8 +71,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const maxRetries = 3;
     let retryCount = 0;
     let lastError: any;
-    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     while (retryCount < maxRetries) {
       try {
