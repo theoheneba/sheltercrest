@@ -1,11 +1,11 @@
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  MessageSquare, Users, Clock, CheckCircle, AlertTriangle,
-  Search, Filter, Eye, MessageCircle, Phone, Mail, Flag,
-  ArrowUpRight, ArrowDownRight, FileText, BarChart2,
-  UserCheck, Star, RefreshCw, Inbox, Globe
+  MessageSquare, Clock, CheckCircle, AlertTriangle,
+  Search, Eye, MessageCircle, Phone, Mail,
+  FileText, BarChart2, UserCheck, Star, Inbox, Globe
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 
@@ -164,12 +164,31 @@ const SupportManagement = () => {
         <h1 className="text-2xl font-bold text-gray-900">Support Management</h1>
         <div className="flex space-x-3">
           <Button
+            onClick={() => {
+              const csvContent = 'Ticket ID,Subject,User,Status,Priority,Created At\n' +
+                mockTickets.map(ticket => 
+                  `${ticket.id},${ticket.subject},${ticket.user.name},${ticket.status},${ticket.priority},${ticket.createdAt}`
+                ).join('\n');
+              
+              const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.setAttribute('href', url);
+              link.setAttribute('download', 'support_tickets.csv');
+              link.style.visibility = 'hidden';
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+              
+              toast.success('Report exported successfully');
+            }}
             variant="outline"
             leftIcon={<FileText size={18} />}
           >
             Export Report
           </Button>
           <Button
+            onClick={() => toast.success('New ticket creation would open here')}
             leftIcon={<MessageSquare size={18} />}
           >
             New Ticket
@@ -375,8 +394,8 @@ const SupportManagement = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <Button
                         size="sm"
-                        variant="outline"
                         onClick={() => setSelectedTicket(ticket.id)}
+                        variant="outline"
                       >
                         View Details
                       </Button>
@@ -451,6 +470,7 @@ const SupportManagement = () => {
               <Button
                 variant="outline"
                 fullWidth
+                onClick={() => toast.success('New ticket creation would open here')}
                 leftIcon={<MessageSquare size={18} />}
               >
                 Create New Ticket
@@ -458,6 +478,7 @@ const SupportManagement = () => {
               <Button
                 variant="outline"
                 fullWidth
+                onClick={() => toast.success('KB article creation would open here')}
                 leftIcon={<FileText size={18} />}
               >
                 Add KB Article
@@ -465,6 +486,7 @@ const SupportManagement = () => {
               <Button
                 variant="outline"
                 fullWidth
+                onClick={() => toast.success('Reports view would open here')}
                 leftIcon={<BarChart2 size={18} />}
               >
                 View Reports
@@ -472,6 +494,7 @@ const SupportManagement = () => {
               <Button
                 variant="outline"
                 fullWidth
+                onClick={() => toast.success('Assignment management would open here')}
                 leftIcon={<UserCheck size={18} />}
               >
                 Manage Assignments
@@ -522,7 +545,12 @@ const SupportManagement = () => {
             <div className="p-6 border-t border-gray-200">
               <div className="flex justify-end space-x-3">
                 <Button variant="outline">Close Ticket</Button>
-                <Button>Update Status</Button>
+                <Button onClick={() => {
+                  toast.success('Ticket status updated');
+                  setSelectedTicket(null);
+                }}>
+                  Update Status
+                </Button>
               </div>
             </div>
           </div>

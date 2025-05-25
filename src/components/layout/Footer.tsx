@@ -6,7 +6,13 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           <div className="col-span-1 md:col-span-2">
-            <h3 className="text-2xl font-bold text-primary-500 mb-4">ShelterCrest</h3>
+            <div className="mb-4">
+              <img 
+                src="http://translogixgroup.com/wp-content/uploads/2025/05/shelterlogo.png" 
+                alt="ShelterCrest Logo" 
+                className="h-12 w-auto" 
+              />
+            </div>
             <p className="text-gray-300 max-w-md">
               Providing innovative housing solutions and financial assistance for a better tomorrow.
             </p>
@@ -53,8 +59,9 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <ul className="space-y-2 text-gray-300">
+              <li>Phone: +233 20 409 0400/+233 20 409 0411</li>
               <li>Email: support@sheltercrest.com</li>
-              <li>Phone: (555) 123-4567</li>
+              <li>Address: GD-158-9375, Nii Laryea Odumanye Road, Ashiyie, Accra</li>
               <li>Hours: 9AM-5PM, Monday-Friday</li>
             </ul>
           </div>

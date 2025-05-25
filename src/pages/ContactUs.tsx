@@ -43,24 +43,23 @@ const ContactUs = () => {
                 <Phone size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Phone</h3>
-              <p className="text-gray-600">+233 55 123 4567</p>
-              <p className="text-gray-600">Mon-Fri, 9AM-5PM GMT</p>
+              <p className="text-gray-600">+233 20 409 0400</p>
+              <p className="text-gray-600">+233 20 409 0411</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary-100 text-primary-800 mb-4">
                 <Mail size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Email</h3>
-              <p className="text-gray-600">info@sheltercrest.org</p>
-              <p className="text-gray-600">support@sheltercrest.org</p>
+              <p className="text-gray-600">support@sheltercrest.com</p>
             </div>
             <div className="text-center">
               <div className="inline-flex items-center justify-center h-16 w-16 rounded-full bg-primary-100 text-primary-800 mb-4">
                 <MapPin size={32} />
               </div>
               <h3 className="text-xl font-semibold mb-2">Office</h3>
-              <p className="text-gray-600">123 Business Avenue</p>
-              <p className="text-gray-600">Accra, Ghana</p>
+              <p className="text-gray-600">GD-158-9375, Nii Laryea Odumanye Road</p>
+              <p className="text-gray-600">Ashiyie, Accra</p>
             </div>
           </div>
         </div>

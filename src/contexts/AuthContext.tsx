@@ -1,5 +1,7 @@
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { authService } from '../services/authService';
+import { createClient } from '@supabase/supabase-js';
+import { toast } from 'react-hot-toast';
 
 interface User {
   id: string;
@@ -12,7 +14,8 @@ interface User {
 interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
-  isAdmin: boolean;
+  isAdmin: boolean; 
+  userRole: string | null;
   isInitialized: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: RegisterData) => Promise<void>;
@@ -68,11 +71,53 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const maxRetries = 3;
     let retryCount = 0;
     let lastError: any;
+    const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+    const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
     while (retryCount < maxRetries) {
       try {
-        await authService.register(userData);
-        // Auto login after registration
+        // Step 1: Create the user with Supabase Auth
+        const { data: authData, error: signUpError } = await supabase.auth.signUp({
+          email: userData.email,
+          password: userData.password,
+          options: {
+            data: {
+              first_name: userData.firstName,
+              last_name: userData.lastName
+            }
+          }
+        });
+
+        if (signUpError) throw signUpError;
+        if (!authData.user) throw new Error('No user returned from registration');
+
+        // Step 2: Create the user profile directly in the database
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            first_name: userData.firstName,
+            last_name: userData.lastName,
+            email: userData.email,
+            phone: userData.phone || null,
+            address: userData.address || null,
+            city: userData.city || null,
+            state: userData.state || null,
+            zip: userData.zip || null,
+            employment_status: userData.employmentStatus || null,
+            employer_name: userData.employerName || null,
+            monthly_income: userData.monthlyIncome || null,
+            role: 'user'
+          });
+
+        if (profileError) {
+          console.error('Profile creation error:', profileError);
+          throw new Error('User created but profile setup failed. Please contact support.');
+        }
+
+        toast.success('Registration successful! Please log in.');
+        
+        // Auto login after successful registration
         await login(userData.email, userData.password);
         return;
       } catch (error: any) {
@@ -84,9 +129,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           const waitTime = 10 * 1000 * Math.pow(2, retryCount); // Exponential backoff
           await sleep(waitTime);
           retryCount++;
-        } else if (error?.message?.includes('row-level security policy')) {
-          // RLS policy error - don't retry
-          throw new Error('Unable to create user profile. Please contact support.');
         } else {
           // For other errors, don't retry
           throw error;
@@ -106,7 +148,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const value = {
     user,
     isAuthenticated: !!user,
-    isAdmin: user?.role === 'admin' || user?.role === 'superadmin',
+    isAdmin: ['admin', 'superadmin', 'sales_executive', 'credit_analyst', 'recovery_and_collections', 'inspection_and_verification', 'finance', 'company_manager'].includes(user?.role || ''),
+    userRole: user?.role,
     isInitialized,
     login,
     register,

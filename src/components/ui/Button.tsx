@@ -21,19 +21,19 @@ const Button: React.FC<ButtonProps> = ({
   className = '',
   ...props
 }) => {
-  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed';
+  const baseClasses = 'inline-flex items-center justify-center font-medium transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-60 disabled:cursor-not-allowed shadow-button hover:shadow-button-hover';
   
   const variantClasses = {
-    primary: 'bg-primary-600 hover:bg-primary-700 text-white shadow-sm focus:ring-primary-500',
-    secondary: 'bg-white hover:bg-gray-50 text-primary-700 border-2 border-primary-600 shadow-sm focus:ring-primary-500',
-    outline: 'border-2 border-current text-primary-600 hover:bg-primary-50 focus:ring-primary-500',
-    danger: 'bg-red-600 hover:bg-red-700 text-white focus:ring-red-500'
+    primary: 'bg-primary-600 hover:bg-primary-700 text-white focus:ring-primary-500 transform hover:-translate-y-0.5',
+    secondary: 'bg-white hover:bg-gray-50 text-primary-700 border border-primary-600 focus:ring-primary-500 transform hover:-translate-y-0.5',
+    outline: 'bg-transparent border border-current text-primary-600 hover:bg-primary-50 focus:ring-primary-500 transform hover:-translate-y-0.5',
+    danger: 'bg-danger-600 hover:bg-danger-700 text-white focus:ring-danger-500 transform hover:-translate-y-0.5'
   };
   
   const sizeClasses = {
     sm: 'text-sm py-1.5 px-3 rounded-lg gap-1.5',
-    md: 'text-base py-2 px-4 rounded-lg gap-2',
-    lg: 'text-lg py-2.5 px-6 rounded-xl gap-2.5'
+    md: 'text-base py-2.5 px-5 rounded-lg gap-2',
+    lg: 'text-lg py-3 px-7 rounded-xl gap-3'
   };
   
   const widthClass = fullWidth ? 'w-full' : '';

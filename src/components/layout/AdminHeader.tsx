@@ -11,7 +11,7 @@ interface AdminHeaderProps {
 
 const AdminHeader = ({ sidebarOpen, onToggleSidebar, theme, onToggleTheme }: AdminHeaderProps) => {
   return (
-    <header className={`fixed top-0 right-0 left-0 h-16 z-30 transition-all duration-300 ${
+    <header className={`fixed top-0 right-0 left-0 h-20 z-30 transition-all duration-300 ${
       theme === 'dark' 
         ? 'bg-gray-800 border-gray-700' 
         : 'bg-white border-gray-200'
@@ -20,12 +20,20 @@ const AdminHeader = ({ sidebarOpen, onToggleSidebar, theme, onToggleTheme }: Adm
         <div className="flex items-center flex-1">
           <button
             onClick={onToggleSidebar}
-            className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors ${
+            className={`p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors mr-4 ${
               theme === 'dark' ? 'text-gray-200' : 'text-gray-600'
             }`}
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
           </button>
+
+          <div className="flex-shrink-0 flex items-center mr-6">
+            <img 
+              src="https://translogixgroup.com/wp-content/uploads/2025/05/shelterlogo.png" 
+              alt="ShelterCrest Logo" 
+              className="h-8 w-auto"
+            />
+          </div>
 
           <div className="ml-4 flex-1 max-w-xl relative hidden sm:block">
             <div className="relative">
@@ -35,7 +43,7 @@ const AdminHeader = ({ sidebarOpen, onToggleSidebar, theme, onToggleTheme }: Adm
               <input
                 type="text"
                 placeholder="Search..."
-                className={`w-full pl-10 pr-4 py-2 rounded-lg border ${
+                className={`w-full pl-10 pr-4 py-2.5 rounded-lg border ${
                   theme === 'dark'
                     ? 'bg-gray-700 border-gray-600 text-gray-200 placeholder-gray-400'
                     : 'bg-gray-50 border-gray-200 text-gray-900 placeholder-gray-500'
@@ -61,17 +69,17 @@ const AdminHeader = ({ sidebarOpen, onToggleSidebar, theme, onToggleTheme }: Adm
 
           <button className="relative p-2">
             <Bell size={20} className={theme === 'dark' ? 'text-gray-200' : 'text-gray-600'} />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+            <span className="absolute top-1 right-1 w-2 h-2 bg-danger-500 rounded-full"></span>
           </button>
 
           <div className="h-8 w-px bg-gray-200 dark:bg-gray-700"></div>
 
           <div className="flex items-center">
-            <div className="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+            <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center">
               <span className="text-sm font-medium text-primary-700">AD</span>
             </div>
             <div className="ml-3 hidden sm:block">
-              <p className={`text-sm font-medium ${
+              <p className={`text-sm font-semibold ${
                 theme === 'dark' ? 'text-gray-200' : 'text-gray-900'
               }`}>Admin User</p>
               <p className={`text-xs ${

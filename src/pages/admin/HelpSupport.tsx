@@ -1,8 +1,15 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { HelpCircle, Book, MessageCircle, Phone, Mail, FileText, ExternalLink } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+
+const handleContactSupport = () => {
+  // In a real implementation, this would open a chat window or a contact form
+  toast.success('Support contact initiated');
+  window.open('mailto:support@sheltercrest.org', '_blank');
+};
 
 const HelpSupport = () => {
   return (
@@ -11,6 +18,7 @@ const HelpSupport = () => {
         <h1 className="text-2xl font-bold text-gray-900">Help & Support</h1>
         <Button
           variant="outline"
+          onClick={handleContactSupport}
           leftIcon={<MessageCircle size={18} />}
         >
           Contact Support
@@ -168,7 +176,13 @@ const HelpSupport = () => {
                 <div className="ml-3">
                   <p className="text-sm font-medium text-gray-900">Live Chat</p>
                   <p className="text-sm text-gray-600">Available 24/7</p>
-                  <Button size="sm" className="mt-2">Start Chat</Button>
+                  <Button 
+                    size="sm" 
+                    className="mt-2"
+                    onClick={() => toast.success('Chat functionality would open here')}
+                  >
+                    Start Chat
+                  </Button>
                 </div>
               </div>
             </div>

@@ -1,17 +1,19 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  DollarSign, TrendingUp, Calendar, CreditCard, Building,
-  AlertTriangle, CheckCircle, Clock, Download, Filter,
-  Search, ArrowUpRight, ArrowDownRight, FileText, Users,
+  DollarSign, TrendingUp, Calendar, CreditCard,
+  AlertTriangle, CheckCircle, Clock, Download,
+  Search, ArrowUpRight, ArrowDownRight, FileText,
   RefreshCw
 } from 'lucide-react';
+import { useLocation } from 'react-router-dom';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   ResponsiveContainer, LineChart, Line, AreaChart, Area
 } from 'recharts';
+import { toast } from 'react-hot-toast';
 
 // Mock data for charts
 const paymentTrends = [
@@ -56,10 +58,53 @@ const mockPayments = [
 ];
 
 const PaymentManagement = () => {
+  const location = useLocation();
   const [view, setView] = useState<'list' | 'calendar'>('list');
   const [dateRange, setDateRange] = useState('30d');
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState('all');
+  const [statusFilter, setStatusFilter] = useState(
+    (location.state as { filter?: string } | null)?.filter || 'all'
+  );
+
+  const handleExportReport = () => {
+    try {
+      // Create CSV content
+      const headers = ['ID', 'Tenant', 'Landlord', 'Amount', 'Status', 'Date'];
+      const csvContent = [
+        headers.join(','),
+        ...mockPayments.map(payment => [
+          payment.id,
+          payment.tenant,
+          payment.landlord,
+          payment.amount,
+          payment.status,
+          payment.date
+        ].join(','))
+      ].join('\n');
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `payments_report_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Report exported successfully');
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      toast.error('Failed to export report');
+    }
+  };
+
+  const handleReconcile = () => {
+    toast.success('Payment reconciliation initiated');
+    // In a real implementation, this would connect to a payment gateway API
+    // and reconcile payment records
+  };
 
   const getStatusBadge = (status: string) => {
     const config = {
@@ -86,11 +131,13 @@ const PaymentManagement = () => {
         <div className="flex space-x-3">
           <Button
             variant="outline"
+            onClick={handleExportReport}
             leftIcon={<Download size={18} />}
           >
             Export Report
           </Button>
           <Button
+            onClick={handleReconcile}
             leftIcon={<RefreshCw size={18} />}
           >
             Reconcile

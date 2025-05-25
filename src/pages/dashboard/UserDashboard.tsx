@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Calendar, ArrowRight, AlertCircle, User, Clock, CheckCircle, 
@@ -45,8 +45,9 @@ const paymentHistory = [
 ];
 
 const UserDashboard = () => {
-  const { user } = useAuth();
+  const { user, userRole } = useAuth();
   const { status, applicationData } = useApplicationStatus();
+  const navigate = useNavigate();
   const { upcomingPayment, recentPayments } = usePayments();
   const [activeTab, setActiveTab] = useState<'overview' | 'payments' | 'documents'>('overview');
   const [showPaymentModal, setShowPaymentModal] = useState(false);
@@ -55,8 +56,14 @@ const UserDashboard = () => {
   useEffect(() => {
     fetchApplications();
     setupSubscriptions();
+    
+    // Redirect to role-specific dashboard if user has a special role
+    if (userRole && userRole !== 'user') {
+      navigate(`/dashboard/${userRole.toLowerCase().replace('_', '-')}`);
+    }
+    
     return () => cleanup();
-  }, [fetchApplications, setupSubscriptions, cleanup]);
+  }, [fetchApplications, setupSubscriptions, cleanup, userRole, navigate]);
 
   const monthlyRent = applicationData?.monthlyRent || 1200;
   const initialPayment = calculateInitialPayment(monthlyRent);
@@ -98,17 +105,17 @@ const UserDashboard = () => {
       <motion.div variants={fadeIn} className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <ApplicationStatusCard status={status} />
         
-        <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200">
+        <Card className="bg-gradient-to-br from-primary-50 to-primary-100 border border-primary-200 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-start">
-              <div className="mr-4 p-3 bg-white rounded-lg shadow-md">
+              <div className="mr-4 p-3 bg-white rounded-xl shadow-md">
                 <Calendar className="h-6 w-6 text-primary-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-primary-900">Next Payment</h2>
+                <h2 className="text-lg font-semibold text-primary-800">Next Payment</h2>
                 {status === 'approved' && upcomingPayment ? (
                   <>
-                    <p className="mt-2 text-2xl font-bold text-primary-800">{formatCurrency(upcomingPayment.amount)}</p>
+                    <p className="mt-2 text-2xl font-bold text-primary-700">{formatCurrency(upcomingPayment.amount)}</p>
                     <p className="mt-1 text-sm text-primary-600">
                       Due in {upcomingPayment.daysUntil} days ({new Date(upcomingPayment.date).toLocaleDateString()})
                     </p>
@@ -123,16 +130,16 @@ const UserDashboard = () => {
           </CardContent>
         </Card>
         
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border border-green-200">
+        <Card className="bg-gradient-to-br from-success-50 to-success-100 border border-success-200 shadow-lg">
           <CardContent className="p-6">
             <div className="flex items-start">
-              <div className="mr-4 p-3 bg-white rounded-lg shadow-md">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+              <div className="mr-4 p-3 bg-white rounded-xl shadow-md">
+                <CheckCircle className="h-6 w-6 text-success-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-green-900">Payment Reliability</h2>
-                <p className="mt-2 text-2xl font-bold text-green-800">{paymentReliability.toFixed(1)}%</p>
-                <p className="mt-1 text-sm text-green-600">On-time payment rate</p>
+                <h2 className="text-lg font-semibold text-success-800">Payment Reliability</h2>
+                <p className="mt-2 text-2xl font-bold text-success-700">{paymentReliability.toFixed(1)}%</p>
+                <p className="mt-1 text-sm text-success-600">On-time payment rate</p>
               </div>
             </div>
           </CardContent>
@@ -212,11 +219,11 @@ const UserDashboard = () => {
         </div>
 
         <div className="space-y-6">
-          <Card className="bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200">
+          <Card className="bg-gradient-to-br from-accent-50 to-accent-100 border border-accent-200 shadow-lg">
             <CardContent className="p-6">
               <div className="flex items-center mb-6">
                 <div className="relative">
-                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-md">
+                  <div className="w-16 h-16 rounded-full bg-white flex items-center justify-center shadow-lg">
                     <User className="h-8 w-8 text-accent-600" />
                   </div>
                 </div>
@@ -234,7 +241,7 @@ const UserDashboard = () => {
                     <span className="text-accent-700">Profile Completion</span>
                     <span className="font-medium text-accent-900">{profileCompletionPercentage}%</span>
                   </div>
-                  <div className="w-full bg-white rounded-full h-2 shadow-inner">
+                  <div className="w-full bg-white rounded-full h-3 shadow-inner">
                     <motion.div 
                       className="bg-accent-600 h-2 rounded-full"
                       initial={{ width: 0 }}
@@ -258,7 +265,7 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
@@ -297,7 +304,7 @@ const UserDashboard = () => {
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="shadow-lg">
             <CardHeader>
               <CardTitle>Recent Notifications</CardTitle>
             </CardHeader>
@@ -324,7 +331,7 @@ const UserDashboard = () => {
       </motion.div>
 
       <motion.div variants={fadeIn}>
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
             <div className="flex justify-between items-center">
               <CardTitle>Recent Payments</CardTitle>

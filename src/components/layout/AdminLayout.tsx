@@ -12,7 +12,7 @@ const AdminLayout = () => {
   const toggleTheme = () => setTheme(theme === 'light' ? 'dark' : 'light');
 
   return (
-    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50'}`}>
+    <div className={`min-h-screen ${theme === 'dark' ? 'dark bg-gray-900' : 'bg-gray-50'} transition-colors duration-300`}>
       <AdminHeader 
         sidebarOpen={sidebarOpen} 
         onToggleSidebar={toggleSidebar}
@@ -25,7 +25,7 @@ const AdminLayout = () => {
         
         <main className={`flex-1 transition-all duration-300 ${
           sidebarOpen ? 'lg:ml-64' : 'lg:ml-20'
-        } mt-16 p-4 sm:p-6 lg:p-8`}>
+        } mt-20 p-4 sm:p-6 lg:p-8`}>
           <AnimatePresence mode="wait">
             <motion.div
               key={location.pathname}
@@ -33,7 +33,7 @@ const AdminLayout = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.3 }}
-              className="container mx-auto max-w-7xl"
+              className="container mx-auto max-w-7xl pb-12"
             >
               <Outlet />
             </motion.div>

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { supabase, subscribeToChanges } from '../services/db';
-import { toast } from 'react-hot-toast';
+import { toast } from 'react-hot-toast'; 
 
 interface SystemSettings {
   id?: string;
@@ -76,7 +76,7 @@ interface AdminState {
   fetchProperties: () => Promise<void>;
   addProperty: (property: Omit<Property, 'id'>) => Promise<void>;
   updateProperty: (id: string, data: Partial<Property>) => Promise<void>;
-  deleteProperty: (id: string) => Promise<void>;
+  deleteProperty: (id: string) => Promise<void>; 
   fetchUsers: () => Promise<void>;
   updateUser: (id: string, data: Partial<User>) => Promise<void>;
 }
@@ -544,7 +544,7 @@ export const useAdminStore = create<AdminState>()(
       
       addProperty: async (property) => {
         try {
-          set({ loading: true, error: null });
+          set({ loading: true, error: null }); 
           const { data, error } = await supabase
             .from('properties')
             .insert([property])
@@ -568,7 +568,7 @@ export const useAdminStore = create<AdminState>()(
       
       updateProperty: async (id, data) => {
         try {
-          set({ loading: true, error: null });
+          set({ loading: true, error: null }); 
           const { data: updatedProperty, error } = await supabase
             .from('properties')
             .update(data)
@@ -595,7 +595,7 @@ export const useAdminStore = create<AdminState>()(
       
       deleteProperty: async (id) => {
         try {
-          set({ loading: true, error: null });
+          set({ loading: true, error: null }); 
           const { error } = await supabase
             .from('properties')
             .delete()

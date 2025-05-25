@@ -2,19 +2,18 @@ import { useState } from 'react';
 import { Upload, FileText, Filter, Search } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import DocumentsList from './components/DocumentsList';
+import DocumentsList from './components/DocumentsList'; 
+import DocumentUploader from '../../components/document/DocumentUploader';
+import { useAuth } from '../../contexts/AuthContext';
 
 const Documents = () => {
+  const { user } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
-  const [isUploading, setIsUploading] = useState(false);
+  const [showUploader, setShowUploader] = useState(false);
 
-  const handleUpload = () => {
-    setIsUploading(true);
-    // Simulate upload delay
-    setTimeout(() => {
-      setIsUploading(false);
-    }, 2000);
+  const handleUploadComplete = () => {
+    setShowUploader(false);
   };
 
   return (
@@ -22,8 +21,7 @@ const Documents = () => {
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Documents</h1>
         <Button
-          onClick={handleUpload}
-          isLoading={isUploading}
+          onClick={() => setShowUploader(true)}
           leftIcon={<Upload size={18} />}
         >
           Upload New Document
@@ -73,11 +71,22 @@ const Documents = () => {
 
       <Card>
         <CardHeader>
-          <CardTitle>Document Management</CardTitle>
+          <div className="flex justify-between items-center">
+            <CardTitle>Document Management</CardTitle>
+            {showUploader && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowUploader(false)}
+              >
+                Cancel Upload
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {/* Search and Filters */}
-          <div className="mb-6 flex flex-col sm:flex-row gap-4">
+          <div className={`mb-6 flex flex-col sm:flex-row gap-4 ${showUploader ? 'hidden' : ''}`}>
             <div className="flex-1 relative">
               <Search size={20} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
@@ -103,8 +112,14 @@ const Documents = () => {
             </div>
           </div>
 
-          {/* Documents List */}
-          <DocumentsList />
+          {/* Document Uploader or List */}
+          {showUploader ? (
+            <DocumentUploader 
+              onUploadComplete={handleUploadComplete}
+            />
+          ) : (
+            <DocumentsList />
+          )}
         </CardContent>
       </Card>
     </div>

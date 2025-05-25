@@ -4,19 +4,21 @@ export default {
   theme: {
     extend: {
       colors: {
+        // Modern primary color - Royal Blue
         primary: {
-          50: '#f0f9ff',
-          100: '#e0f2fe',
-          200: '#bae6fd',
-          300: '#7dd3fc',
-          400: '#38bdf8',
-          500: '#0ea5e9',
-          600: '#0284c7',
-          700: '#0369a1',
-          800: '#075985',
-          900: '#0c4a6e',
-          950: '#082f49',
+          50: '#eef2ff',
+          100: '#e0e7ff',
+          200: '#c7d2fe',
+          300: '#a5b4fc',
+          400: '#818cf8',
+          500: '#6366f1',
+          600: '#4f46e5',
+          700: '#4338ca',
+          800: '#3730a3',
+          900: '#312e81',
+          950: '#1e1b4b',
         },
+        // Modern secondary color - Slate
         secondary: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -30,22 +32,66 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
+        // Modern accent color - Emerald
         accent: {
-          50: '#fdf4ff',
-          100: '#fae8ff',
-          200: '#f5d0fe',
-          300: '#f0abfc',
-          400: '#e879f9',
-          500: '#d946ef',
-          600: '#c026d3',
-          700: '#a21caf',
-          800: '#86198f',
-          900: '#701a75',
-          950: '#4a044e',
+          50: '#ecfdf5',
+          100: '#d1fae5',
+          200: '#a7f3d0',
+          300: '#6ee7b7',
+          400: '#34d399',
+          500: '#10b981',
+          600: '#059669',
+          700: '#047857',
+          800: '#065f46',
+          900: '#064e3b',
+          950: '#022c22',
+        },
+        // Modern success color - Green
+        success: {
+          50: '#f0fdf4',
+          100: '#dcfce7',
+          200: '#bbf7d0',
+          300: '#86efac',
+          400: '#4ade80',
+          500: '#22c55e',
+          600: '#16a34a',
+          700: '#15803d',
+          800: '#166534',
+          900: '#14532d',
+          950: '#052e16',
+        },
+        // Modern warning color - Amber
+        warning: {
+          50: '#fffbeb',
+          100: '#fef3c7',
+          200: '#fde68a',
+          300: '#fcd34d',
+          400: '#fbbf24',
+          500: '#f59e0b',
+          600: '#d97706',
+          700: '#b45309',
+          800: '#92400e',
+          900: '#78350f',
+          950: '#451a03',
+        },
+        // Modern danger color - Rose
+        danger: {
+          50: '#fff1f2',
+          100: '#ffe4e6',
+          200: '#fecdd3',
+          300: '#fda4af',
+          400: '#fb7185',
+          500: '#f43f5e',
+          600: '#e11d48',
+          700: '#be123c',
+          800: '#9f1239',
+          900: '#881337',
+          950: '#4c0519',
         },
       },
       fontFamily: {
         sans: [
+          'DM Sans',
           'Inter',
           'ui-sans-serif',
           'system-ui',
@@ -57,13 +103,20 @@ export default {
           'Arial',
           'sans-serif',
         ],
+        heading: [
+          'Poppins',
+          'Inter',
+          'ui-sans-serif',
+          'system-ui',
+        ],
       },
       boxShadow: {
-        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
-        'card-hover': '0 4px 12px rgba(0, 0, 0, 0.12)',
+        'card': '0 1px 3px rgba(0, 0, 0, 0.05), 0 1px 2px rgba(0, 0, 0, 0.1)',
+        'card-hover': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
         'button': '0 1px 2px rgba(0, 0, 0, 0.05)',
-        'button-hover': '0 2px 4px rgba(0, 0, 0, 0.1)',
-        'dropdown': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'button-hover': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        'dropdown': '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+        'glass': '0 8px 32px 0 rgba(31, 38, 135, 0.07)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',
@@ -95,9 +148,15 @@ export default {
           '100%': { transform: 'translateX(0)', opacity: '1' },
         },
       },
+      borderRadius: {
+        'xl': '0.75rem',
+        '2xl': '1rem',
+        '3xl': '1.5rem',
+      },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
         'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
+        'gradient-glass': 'linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05))',
       },
       spacing: {
         '18': '4.5rem',
@@ -322,5 +381,12 @@ export default {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addBase }) {
+      addBase({
+        'html': { fontFamily: 'DM Sans, Inter, sans-serif' },
+        'h1, h2, h3, h4, h5, h6': { fontFamily: 'Poppins, Inter, sans-serif' },
+      })
+    }
+  ],
 };

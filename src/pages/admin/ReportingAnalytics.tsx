@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  TrendingUp, Users, DollarSign, Calendar, Download,
-  Filter, ArrowUpRight, ArrowDownRight, Activity
+  TrendingUp, Users, DollarSign, Calendar, Download, 
+  ArrowUpRight, ArrowDownRight, Activity
 } from 'lucide-react';
 import {
   LineChart, Line, AreaChart, Area, BarChart, Bar,
@@ -10,6 +10,7 @@ import {
 } from 'recharts';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import { Button } from '../../components/ui/Button';
+import { toast } from 'react-hot-toast';
 
 // Mock data for charts
 const monthlyData = [
@@ -31,7 +32,38 @@ const userSegments = [
 
 const ReportingAnalytics = () => {
   const [dateRange, setDateRange] = useState('30d');
-  const [reportType, setReportType] = useState('all');
+
+  const handleExportReport = () => {
+    try {
+      // Create CSV content
+      const headers = ['Month', 'Applications', 'Approvals', 'Disbursements'];
+      const csvContent = [
+        headers.join(','),
+        ...monthlyData.map(data => [
+          data.month,
+          data.applications,
+          data.approvals,
+          data.disbursements
+        ].join(','))
+      ].join('\n');
+      
+      // Create download link
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `analytics_report_${dateRange}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      toast.success('Report exported successfully');
+    } catch (error) {
+      console.error('Error exporting report:', error);
+      toast.error('Failed to export report');
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -51,6 +83,7 @@ const ReportingAnalytics = () => {
           <Button
             variant="outline"
             leftIcon={<Download size={18} />}
+            onClick={handleExportReport}
           >
             Export Report
           </Button>

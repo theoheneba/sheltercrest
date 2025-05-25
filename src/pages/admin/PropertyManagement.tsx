@@ -1,12 +1,38 @@
 import { useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Building, Search, Filter, Edit2, Trash2, Plus, MapPin } from 'lucide-react';
+import { Building, Search, Edit2, Trash2, Plus, MapPin } from 'lucide-react';
 import Card, { CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
 import Button from '../../components/ui/Button';
 import { useAdminStore } from '../../store/adminStore';
+import { toast } from 'react-hot-toast';
+import { useState } from 'react';
+
+interface PropertyFormData {
+  id?: string;
+  name: string;
+  address: string;
+  city: string;
+  state: string;
+  total_units: number;
+  occupied_units: number;
+  monthly_revenue: number;
+  status: 'active' | 'maintenance' | 'inactive';
+}
 
 const PropertyManagement = () => {
-  const { properties, loading, fetchProperties, setupSubscriptions, cleanup } = useAdminStore();
+  const { properties, loading, fetchProperties, setupSubscriptions, cleanup, addProperty, updateProperty, deleteProperty } = useAdminStore();
+  const [showForm, setShowForm] = useState(false);
+  const [editingProperty, setEditingProperty] = useState<PropertyFormData | null>(null);
+  const [formData, setFormData] = useState<PropertyFormData>({
+    name: '',
+    address: '',
+    city: '',
+    state: '',
+    total_units: 0,
+    occupied_units: 0,
+    monthly_revenue: 0,
+    status: 'active'
+  });
 
   useEffect(() => {
     fetchProperties();
@@ -14,12 +40,83 @@ const PropertyManagement = () => {
     return () => cleanup();
   }, [fetchProperties, setupSubscriptions, cleanup]);
 
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: name === 'total_units' || name === 'occupied_units' || name === 'monthly_revenue'
+        ? parseFloat(value)
+        : value
+    }));
+  };
+
+  const handleAddProperty = () => {
+    setEditingProperty(null);
+    setFormData({
+      name: '',
+      address: '',
+      city: '',
+      state: '',
+      total_units: 0,
+      occupied_units: 0,
+      monthly_revenue: 0,
+      status: 'active'
+    });
+    setShowForm(true);
+  };
+
+  const handleEditProperty = (property: any) => {
+    setEditingProperty(property);
+    setFormData({
+      id: property.id,
+      name: property.name,
+      address: property.address,
+      city: property.city,
+      state: property.state,
+      total_units: property.total_units,
+      occupied_units: property.occupied_units,
+      monthly_revenue: property.monthly_revenue,
+      status: property.status
+    });
+    setShowForm(true);
+  };
+
+  const handleDeleteProperty = async (id: string) => {
+    if (window.confirm('Are you sure you want to delete this property?')) {
+      try {
+        await deleteProperty(id);
+        toast.success('Property deleted successfully');
+      } catch (error) {
+        console.error('Error deleting property:', error);
+        toast.error('Failed to delete property');
+      }
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      if (editingProperty) {
+        await updateProperty(editingProperty.id, formData);
+        toast.success('Property updated successfully');
+      } else {
+        await addProperty(formData);
+        toast.success('Property added successfully');
+      }
+      setShowForm(false);
+    } catch (error) {
+      console.error('Error saving property:', error);
+      toast.error('Failed to save property');
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-2xl font-bold text-gray-900">Property Management</h1>
         <Button
           leftIcon={<Plus size={18} />}
+          onClick={handleAddProperty}
         >
           Add Property
         </Button>
@@ -207,10 +304,16 @@ const PropertyManagement = () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                         <div className="flex justify-end space-x-2">
-                          <button className="text-primary-600 hover:text-primary-900">
+                          <button 
+                            className="text-primary-600 hover:text-primary-900"
+                            onClick={() => handleEditProperty(property)}
+                          >
                             <Edit2 size={18} />
                           </button>
-                          <button className="text-red-600 hover:text-red-900">
+                          <button 
+                            className="text-red-600 hover:text-red-900"
+                            onClick={() => handleDeleteProperty(property.id)}
+                          >
                             <Trash2 size={18} />
                           </button>
                         </div>
@@ -223,6 +326,156 @@ const PropertyManagement = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Property Form Modal */}
+      {showForm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-2xl p-6">
+            <h2 className="text-xl font-bold mb-4">
+              {editingProperty ? 'Edit Property' : 'Add New Property'}
+            </h2>
+            
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Property Name
+                  </label>
+                  <input
+                    type="text"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Status
+                  </label>
+                  <select
+                    name="status"
+                    value={formData.status}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  >
+                    <option value="active">Active</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="inactive">Inactive</option>
+                  </select>
+                </div>
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Address
+                </label>
+                <input
+                  type="text"
+                  name="address"
+                  value={formData.address}
+                  onChange={handleInputChange}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                  required
+                />
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    City
+                  </label>
+                  <input
+                    type="text"
+                    name="city"
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    State/Region
+                  </label>
+                  <input
+                    type="text"
+                    name="state"
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Total Units
+                  </label>
+                  <input
+                    type="number"
+                    name="total_units"
+                    value={formData.total_units}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                    min="0"
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Occupied Units
+                  </label>
+                  <input
+                    type="number"
+                    name="occupied_units"
+                    value={formData.occupied_units}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                    min="0"
+                    max={formData.total_units}
+                  />
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Monthly Revenue (GH₵)
+                  </label>
+                  <input
+                    type="number"
+                    name="monthly_revenue"
+                    value={formData.monthly_revenue}
+                    onChange={handleInputChange}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    required
+                    min="0"
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-3 pt-4">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {editingProperty ? 'Update Property' : 'Add Property'}
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

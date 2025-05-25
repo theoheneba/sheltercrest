@@ -80,6 +80,30 @@ export const authService = {
 
       if (signUpError) throw signUpError;
       if (!authData.user) throw new Error('No user returned from registration');
+      
+      // Create profile record
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert({
+          id: authData.user.id,
+          first_name: data.firstName,
+          last_name: data.lastName,
+          email: data.email,
+          phone: data.phone || null,
+          address: data.address || null,
+          city: data.city || null,
+          state: data.state || null,
+          zip: data.zip || null,
+          employment_status: data.employmentStatus || null,
+          employer_name: data.employerName || null,
+          monthly_income: data.monthlyIncome || null,
+          role: 'user'
+        });
+        
+      if (profileError) {
+        console.error('Profile creation error:', profileError);
+        throw new Error('User created but profile setup failed. Please contact support.');
+      }
 
       toast.success('Registration successful! Please log in.');
     } catch (error: any) {
@@ -125,6 +149,32 @@ export const authService = {
       };
     } catch (error) {
       console.error('Get current user error:', error);
+      return null;
+    }
+  },
+
+  async getUserByEmail(email: string): Promise<AuthUser | null> {
+    try {
+      // Get profile by email
+      const { data: profiles, error: profileError } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('email', email);
+
+      if (profileError) throw profileError;
+      if (!profiles || profiles.length === 0) return null;
+
+      const profile = profiles[0];
+
+      return {
+        id: profile.id,
+        email: profile.email,
+        firstName: profile.first_name,
+        lastName: profile.last_name,
+        role: profile.role
+      };
+    } catch (error) {
+      console.error('Error fetching user by email:', error);
       return null;
     }
   }
